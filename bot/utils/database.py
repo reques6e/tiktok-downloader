@@ -81,6 +81,10 @@ class Database:
         """Получение пользователя по telegram_id"""
         return self.session.query(User).filter(User.telegram_id == telegram_id).first()
 
+    def get_users(self):
+        """Получение списка всех пользователей"""
+        return self.session.query(User).all()
+
     def user_exists(self, telegram_id):
         """Проверка существования пользователя"""
         return self.session.query(User).filter(User.telegram_id == telegram_id).first() is not None

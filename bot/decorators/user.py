@@ -1,12 +1,11 @@
-import time
-
 from functools import wraps
 from urllib.parse import urlparse
 from aiogram import types
 
-from bot.bot import bot, dp
+from bot.bot import bot
 from bot.utils.database import Database
-from config import _config
+from config import TIME_OUT, CHANNEL_ID, CHANNEL_LINK
+
 
 db = Database()
 
@@ -46,7 +45,7 @@ def allowed_links():
                             '• TikTok 🎵'
                         )
                     )
-            except Exception as e:
+            except Exception:
                 await message.answer(
                     text=(
                         '❌ <b>Ошибка обработки ссылки!</b>\n'
@@ -77,15 +76,14 @@ def timeout():
         @wraps(func)
         async def wrapper(message: types.Message, *args, **kwargs):
             telegram_id = message.chat.id
-            _timeout = _config['TIME_OUT']
             if db.check_timeout(telegram_id=telegram_id):
                 return await message.answer(
                     text=(
-                        f'⏳ <b>После каждого видео тайм-аут {_timeout} секунд, пожалуйста подождите...</b>'
+                        f'⏳ <b>После каждого видео тайм-аут {TIME_OUT} секунд, пожалуйста подождите...</b>'
                     )
                 )
             else:
-                db.update_timeout(telegram_id=telegram_id, duration_seconds=int(_timeout))
+                db.update_timeout(telegram_id=telegram_id, duration_seconds=TIME_OUT)
             return await func(message, *args, **kwargs)
         return wrapper
     return decorator
@@ -95,14 +93,14 @@ def in_channel():
     def decorator(func):
         @wraps(func)
         async def wrapper(message: types.Message, *args, **kwargs):
-            member = await bot.get_chat_member(chat_id=_config['CHANNEL_ID'], user_id=message.chat.id)
+            member = await bot.get_chat_member(chat_id=CHANNEL_ID, user_id=message.chat.id)
             if member.status != 'left':
                 return await func(message, *args, **kwargs)
             else:
                 markup = types.InlineKeyboardMarkup()
                 markup.add(types.InlineKeyboardButton(
                     text='Подписаться',
-                    url=_config['CHANNEL_LINK']
+                    url=CHANNEL_LINK
                 ))
                 await message.answer(
                     text=(

@@ -89,6 +89,11 @@ class Database:
         """Проверка существования пользователя"""
         return self.session.query(User).filter(User.telegram_id == telegram_id).first() is not None
 
+    def is_admin(self, telegram_id: int) -> bool:
+        """Проверяет, является ли пользователь админом."""
+        user = self.session.query(User).filter(User.telegram_id == telegram_id).first()
+        return user.is_admin if user else False
+
     def close(self):
         """Закрытие сессии"""
         self.session.close()

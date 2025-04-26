@@ -42,8 +42,7 @@ async def newsletter(
                         reply_markup=markup
                     )
                 SEND_TRUE += 1 
-            except Exception as e:
-                print(e)
+            except Exception:
                 SEND_ERROR += 1
         else:
             try:

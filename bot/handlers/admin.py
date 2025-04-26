@@ -7,10 +7,12 @@ from bot.keyboards.admin import AdminKeyboard
 from bot.states.admin import Newsletter
 from bot.utils.manage import validate_html_structure
 from bot.flows.admin import newsletter
+from bot.decorators.admin import check_admin
 
 
 @dp.message_handler(commands=['admin'], state='*')
 @dp.callback_query_handler(lambda c: c.data == 'admin_panel')
+@check_admin()
 async def admin(
     message: types.Message, state: FSMContext | None = None
 ):
@@ -35,6 +37,7 @@ async def admin(
     )
 
 @dp.callback_query_handler(lambda c: c.data == 'admin_newsletter')
+@check_admin()
 async def admin_newsletter(callback_query: types.CallbackQuery, state: FSMContext):
     markup = InlineKeyboardMarkup()
     markup.add(
@@ -231,7 +234,7 @@ async def process_button_url(message: types.Message, state: FSMContext):
 async def newsletter_start(callback_query: types.CallbackQuery, state: FSMContext):
     state_data = await state.get_data()
     await state.finish()
-    
+
     await callback_query.message.delete()
     message = await callback_query.message.answer(
         text='Начинаю рассылку...'
@@ -259,5 +262,5 @@ async def newsletter_out(callback_query: types.CallbackQuery, state: FSMContext)
 
     await callback_query.message.delete()
     await callback_query.message.answer(
-        text='Рассылка отменана'
+        text='Рассылка отменена'
     )

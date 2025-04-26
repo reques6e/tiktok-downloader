@@ -1,10 +1,11 @@
 from aiogram import Bot, Dispatcher
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
 
-from config import _config
+from config import API_TOKEN
+
 
 bot = Bot(
-    token=_config['API_TOKEN'], 
+    token=API_TOKEN, 
     parse_mode='HTML',
     disable_web_page_preview=True
 )

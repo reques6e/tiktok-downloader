@@ -23,11 +23,9 @@
 
 ### Админ панель
 
-Тут будут другие скриншоты админ панели, функционала управления и рассылок.
+![Главная](docs/assets/admin-panel.png)
 
-![Заглушка 1](docs/assets/admin_panel_1.png)
-
-![Заглушка 2](docs/assets/admin_panel_2.png)
+![Заглушка 2](docs/assets/admin-panel-2.png)
 
 ## Установка
 

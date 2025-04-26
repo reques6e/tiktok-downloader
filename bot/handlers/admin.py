@@ -1,11 +1,5 @@
-import random
-
-from datetime import datetime
-
 from aiogram.dispatcher import FSMContext
 from aiogram import types
-from aiogram.dispatcher.filters import CommandStart
-from aiogram.utils.exceptions import ChatNotFound
 from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 
 from bot.bot import dp, bot
@@ -13,6 +7,7 @@ from bot.keyboards.admin import AdminKeyboard
 from bot.states.admin import Newsletter
 from bot.utils.manage import validate_html_structure
 from bot.flows.admin import newsletter
+
 
 @dp.message_handler(commands=['admin'], state='*')
 @dp.callback_query_handler(lambda c: c.data == 'admin_panel')
@@ -41,9 +36,19 @@ async def admin(
 
 @dp.callback_query_handler(lambda c: c.data == 'admin_newsletter')
 async def admin_newsletter(callback_query: types.CallbackQuery, state: FSMContext):
-    message = await callback_query.message.edit_text(
-        text='Отправьте пост'
+    markup = InlineKeyboardMarkup()
+    markup.add(
+        InlineKeyboardButton(
+            text='Отмена',
+            callback_data='newsletter_out'
+        )
     )
+
+    message = await callback_query.message.edit_text(
+        text='Отправьте пост',
+        reply_markup=markup
+    )
+
     await Newsletter.send_post.set()
     await state.set_data({
         'messageId': message.message_id
@@ -86,6 +91,12 @@ async def newsletter_send_post(message: types.Message, state: FSMContext):
         InlineKeyboardButton(
             text='Начать рассылку',
             callback_data='newsletter_start'
+        )
+    )
+    reply_markup.add(
+        InlineKeyboardButton(
+            text='Отмена',
+            callback_data='newsletter_out'
         )
     )
 
@@ -187,6 +198,12 @@ async def process_button_url(message: types.Message, state: FSMContext):
             callback_data='newsletter_start'
         )
     )
+    reply_markup.add(
+        InlineKeyboardButton(
+            text='Отмена',
+            callback_data='newsletter_out'
+        )
+    )
     
     if media_type:
         media_method = {
@@ -213,8 +230,10 @@ async def process_button_url(message: types.Message, state: FSMContext):
 @dp.callback_query_handler(lambda c: c.data == 'newsletter_start', state=Newsletter.send_post)
 async def newsletter_start(callback_query: types.CallbackQuery, state: FSMContext):
     state_data = await state.get_data()
-
-    message = await callback_query.message.edit_text(
+    await state.finish()
+    
+    await callback_query.message.delete()
+    message = await callback_query.message.answer(
         text='Начинаю рассылку...'
     )
 
@@ -232,4 +251,13 @@ async def newsletter_start(callback_query: types.CallbackQuery, state: FSMContex
         ),
         chat_id=callback_query.message.chat.id,
         message_id=message.message_id
+    )
+
+@dp.callback_query_handler(lambda c: c.data == 'newsletter_out', state=Newsletter.send_post)
+async def newsletter_out(callback_query: types.CallbackQuery, state: FSMContext):
+    await state.finish()
+
+    await callback_query.message.delete()
+    await callback_query.message.answer(
+        text='Рассылка отменана'
     )

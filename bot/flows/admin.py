@@ -26,18 +26,24 @@ async def newsletter(
     users = database.get_users()
     for user in users:
         if media_type:
-            media = medias[media_type](
-                media=file_id,
-                caption=text
-            )
             try:
-                await bot.send_media_group(
-                    chat_id=user.telegram_id,
-                    media=media,
-                    reply_markup=markup
-                )
+                if media_type == 'photo':
+                    await bot.send_photo(
+                        chat_id=user.telegram_id,
+                        photo=file_id,
+                        caption=text,
+                        reply_markup=markup
+                    )
+                elif media_type == 'video':
+                    await bot.send_video(
+                        chat_id=user.telegram_id,
+                        video=file_id,
+                        caption=text,
+                        reply_markup=markup
+                    )
                 SEND_TRUE += 1 
-            except:
+            except Exception as e:
+                print(e)
                 SEND_ERROR += 1
         else:
             try:
